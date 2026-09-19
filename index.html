@@ -360,7 +360,6 @@ function habilitarBotonPelear(texto){
 function cargarAnalista(){
   if(!("gpu" in navigator)){
     setEstadoAnalista("Tu navegador no soporta el analista local (necesita Chrome o Edge). Podés seguir con sugerencias simples, más flojas.", "");
-    habilitarBotonPelear("Seguir sin analista →");
     return Promise.resolve(null);
   }
   setEstadoAnalista("Descargando tu analista (una sola vez, puede tardar unos minutos)…", "");
@@ -373,11 +372,9 @@ function cargarAnalista(){
   }).then(function(e){
     engineAnalista = e;
     setEstadoAnalista("✓ Analista listo.", "listo");
-    habilitarBotonPelear("¡A pelear!");
     return e;
   }).catch(function(err){
     setEstadoAnalista("No se pudo cargar el analista (" + err.message + "). Podés seguir con sugerencias simples, más flojas.", "");
-    habilitarBotonPelear("Seguir sin analista →");
     return null;
   });
 }
@@ -648,7 +645,13 @@ render();
 
 cargarAnalista().then(function(){
   if(state.turnos.length === 0){
-    generarApertura().then(function(txt){ nuevoTurno(txt, false); });
+    setEstadoAnalista("Preparando la primera pregunta…", engineAnalista ? "listo" : "");
+    generarApertura().then(function(txt){
+      nuevoTurno(txt, false);
+      habilitarBotonPelear(engineAnalista ? "¡A pelear!" : "Seguir sin analista →");
+    });
+  } else {
+    habilitarBotonPelear(engineAnalista ? "¡A pelear!" : "Seguir sin analista →");
   }
 });
 </script>
